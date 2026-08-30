@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { --background: 0 0% 100%; --foreground: 214 69% 14%; --primary: 221 83% 53%; --accent: 20 94% 54%; --success: 142 71% 35%; --surface: 210 40% 96%; --border: 214 32% 91%; }
+* { border-color: hsl(var(--border)); }
+body { color: hsl(var(--foreground)); background: hsl(var(--background)); font-family: var(--font-inter), sans-serif; }
+@layer components { .container-page { @apply mx-auto w-full max-w-6xl px-5 sm:px-8; } .eyebrow { @apply inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-xs font-bold uppercase tracking-wider text-primary; } .field { @apply mt-1 w-full rounded-lg border bg-white px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-blue-100; } .label { @apply text-sm font-semibold text-foreground; } }

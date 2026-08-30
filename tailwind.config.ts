@@ -1,0 +1,2 @@
+import type { Config } from "tailwindcss";
+export default { darkMode: "class", content: ["./app/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}"], theme: { extend: { colors: { background: "hsl(var(--background))", foreground: "hsl(var(--foreground))", primary: "hsl(var(--primary))", accent: "hsl(var(--accent))", success: "hsl(var(--success))", surface: "hsl(var(--surface))", border: "hsl(var(--border))" }, fontFamily: { heading: ["var(--font-poppins)"], body: ["var(--font-inter)"] } } }, plugins: [] } satisfies Config;
