@@ -1,0 +1,11 @@
+import { cert, getApps, initializeApp } from "firebase-admin/app";
+import { getAuth } from "firebase-admin/auth";
+
+const uid = process.argv[2];
+if (!uid) throw new Error("Usage: npm run set-admin -- <firebase-uid>");
+const projectId = process.env.FIREBASE_PROJECT_ID;
+const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n");
+if (!projectId || !clientEmail || !privateKey) throw new Error("Set FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, and FIREBASE_PRIVATE_KEY in your environment.");
+if (!getApps().length) initializeApp({ credential: cert({ projectId, clientEmail, privateKey }) });
+getAuth().setCustomUserClaims(uid, { admin: true }).then(() => console.log(`Admin claim granted to ${uid}.`));
