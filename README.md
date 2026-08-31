@@ -1,6 +1,6 @@
 # BharatKheloSetu
 
-Phase 1 of a mobile-first professional profile and directory network for Indian sport. It includes a landing page, Firebase phone-OTP registration, role-based onboarding, and an editable profile summary.
+Phase 1 of a mobile-first professional profile and directory network for Indian sport. It includes a landing page, interim Firebase anonymous authentication, role-based onboarding, and an editable profile summary.
 
 ## Local setup
 
@@ -12,7 +12,7 @@ Phase 1 of a mobile-first professional profile and directory network for Indian 
    - `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`
    - `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`
    - `NEXT_PUBLIC_FIREBASE_APP_ID`
-3. In Firebase Authentication, enable **Phone** as a sign-in provider. Add `localhost` to Authorized domains for local development. Phone auth uses Firebase's invisible reCAPTCHA.
+3. In Firebase Authentication, enable **Anonymous** as a sign-in provider. Add `localhost` to Authorized domains for local development.
 4. Create a Firestore database, then deploy the included rules: `firebase deploy --only firestore:rules` (after installing and authenticating the Firebase CLI). The included `firebase.json` points Firebase CLI at `firestore.rules`.
 5. Start the app: `npm run dev`, then open `http://localhost:3000`.
 
@@ -30,4 +30,8 @@ Never expose these three Admin SDK values in browser code or commit `.env.local`
 
 ## Data model
 
-Profiles live at `users/{uid}` and include verified phone number, basic information, sport(s), primary role, role-specific details, achievements (up to 10), social links, consent, visibility, and completion metadata. Date of birth is validated client-side at 18+ before the profile is written.
+Profiles live at `users/{uid}` and include a manually entered phone number, basic information, sport(s), primary role, role-specific details, achievements (up to 10), social links, consent, visibility, and completion metadata. Date of birth is validated client-side at 18+ before the profile is written.
+
+## Authentication roadmap
+
+Authentication is temporarily anonymous. OTP will be added later through a third-party provider that verifies the phone number; a backend using the Firebase Admin SDK will mint a Firebase custom token for the client to sign in with.
