@@ -1,37 +1,52 @@
-import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
-import { storage } from "@/lib/firebase";
-
-const MAX_BYTES = 1024 * 1024;
+const MAX_BYTES = 1_048_576;
+const TOO_LARGE_MESSAGE = "File must be 1 MB or smaller — please choose a smaller image.";
+const PHOTO_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const IDENTITY_TYPES = [...PHOTO_TYPES, "application/pdf"];
 
 export async function preparePhoto(file: File) {
-  if (!file.type.startsWith("image/")) throw new Error("Profile photo must be an image");
-  if (file.size <= MAX_BYTES) return file;
-  const image = await createImageBitmap(file);
-  let width = image.width;
-  let height = image.height;
-  for (let quality = 0.82; quality >= 0.42; quality -= 0.1) {
-    const canvas = document.createElement("canvas");
-    canvas.width = width;
-    canvas.height = height;
-    canvas.getContext("2d")?.drawImage(image, 0, 0, width, height);
-    const compressed = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", quality));
-    if (compressed && compressed.size <= MAX_BYTES) return new File([compressed], file.name.replace(/\.[^.]+$/, ".jpg"), { type: "image/jpeg" });
-    width = Math.round(width * 0.75);
-    height = Math.round(height * 0.75);
-  }
-  throw new Error("File must be under 1 MB");
-}
-
-export function validateIdentityProof(file: File) {
-  const allowed = file.type.startsWith("image/") || ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"].includes(file.type);
-  if (!allowed) throw new Error("Identity Proof must be a PDF, document, or image");
-  if (file.size > MAX_BYTES) throw new Error("File must be under 1 MB");
+  if (!PHOTO_TYPES.includes(file.type)) throw new Error("Profile photo must be a JPG, PNG, or WebP image.");
+  if (file.size > MAX_BYTES) throw new Error(TOO_LARGE_MESSAGE);
   return file;
 }
 
-export function uploadFile(file: File, path: string, onProgress: (progress: number) => void) {
+export function validateIdentityProof(file: File) {
+  if (!IDENTITY_TYPES.includes(file.type)) throw new Error("Identity proof must be a JPG, PNG, WebP image, or PDF.");
+  if (file.size > MAX_BYTES) throw new Error(TOO_LARGE_MESSAGE);
+  return file;
+}
+
+export function uploadFile(file: File, onProgress: (progress: number) => void) {
   return new Promise<string>((resolve, reject) => {
-    const task = uploadBytesResumable(ref(storage, path), file, { contentType: file.type });
-    task.on("state_changed", snapshot => onProgress(Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100)), reject, async () => resolve(await getDownloadURL(task.snapshot.ref)));
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+    if (!cloudName || !uploadPreset) {
+      reject(new Error("Uploads are not configured. Please try again later."));
+      return;
+    }
+
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`);
+    xhr.upload.onprogress = event => {
+      if (event.lengthComputable) onProgress(Math.round((event.loaded / event.total) * 100));
+    };
+    xhr.onerror = () => reject(new Error("Upload failed. Please check your connection and retry."));
+    xhr.onload = () => {
+      let response: { secure_url?: string; error?: { message?: string } };
+      try {
+        response = JSON.parse(xhr.responseText);
+      } catch {
+        reject(new Error("Upload failed. Please check your connection and retry."));
+        return;
+      }
+      if (xhr.status >= 200 && xhr.status < 300 && response.secure_url) {
+        resolve(response.secure_url);
+        return;
+      }
+      reject(new Error(response.error?.message || "Upload failed. Please check your connection and retry."));
+    };
+    const body = new FormData();
+    body.append("file", file);
+    body.append("upload_preset", uploadPreset);
+    xhr.send(body);
   });
 }
