@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { doc, getDoc } from "firebase/firestore";
@@ -20,7 +22,7 @@ export default function Login() {
     try {
       const user = await signIn();
       const existing = await getDoc(doc(db, "users", user.uid));
-      router.push(existing.exists() && existing.data().profileComplete === true ? "/profile" : "/join");
+      router.push(existing.exists() && existing.data().profileComplete === true ? "/profile" : "/onboarding/profile");
     } catch (error) {
       setError(error instanceof Error ? error.message : String(error));
     } finally {
