@@ -12,9 +12,9 @@ export default function Home() {
             <BadgeCheck size={14} /> India&apos;s athlete discovery network
           </p>
 
-          <h1 className="mt-5 font-heading text-4xl font-extrabold leading-tight tracking-tight sm:text-6xl">
-            Your sporting journey deserves a{" "}
-            <span className="text-accent">stronger</span> network.
+          <h1 className="mt-5 font-heading text-4xl font-extrabold leading-tight tracking-tight sm:text-6xl uppercase">
+            YOUR SPORTING JOURNEY DESERVES A{" "}
+            <span className="text-accent">STRONGER</span> NETWORK.
           </h1>
 
           <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-600">
