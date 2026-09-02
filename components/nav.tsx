@@ -9,10 +9,10 @@ export function Nav() {
           <Image
             src="/logo.png"
             alt="Bharat Khelo Setu"
-            width={1024}
-            height={409}
+            width={1023}
+            height={143}
             priority
-            className="h-10 sm:h-12 w-auto object-contain"
+            className="h-10 sm:h-14 w-auto object-contain"
           />
         </Link>
       </nav>
